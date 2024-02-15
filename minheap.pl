@@ -46,6 +46,7 @@ insert(H, K, V) :-
     retract(heap(H, S)),
     assert(heap(H, NewS)),
     sort_heap(H, 1, NewS).
+
 %% extract/3 - Estrae un elemento dall'heap
 extract(H, K, V) :-
     head(H, K, V),

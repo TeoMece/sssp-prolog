@@ -39,7 +39,6 @@ new_vertex(G, V) :-
 %% vertices /2 Restituisce la lista dei vertici del grafo 
 vertices(G, Vs) :- 
     atom(G),
-    atom(Vs),
     graph(G),
     findall(vertex(G,V), vertex(G, V), Vs),
     !.
