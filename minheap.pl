@@ -30,66 +30,16 @@ insert(H, K, V) :-
     heap_size(H, S),
     NewS is S + 1,
     assert(heap_entry(H, NewS, K, V)),
-    retract(heap(H, P)),
-    NewP is P + 1,
-    assert(heap(H, NewP)),
-    heapify_down(H, 1).
-
-
-%%%sort mancante
-heapify_up(_H, 1) :- !.
-
-heapify_up(H, P) :-
-    heap_entry(H, P, K, V),
-    P > 1,
-    Par is div(P, 2),
-    heap_entry(H, Par, KPar, VPar),
-    K < KPar,
-    !,
-    retract(heap_entry(H, P, K, V)),
-    assert(heap_entry(H, Par, K, V)),
-    retract(heap_entry(H, Par, KPar, VPar)),
-    assert(heap_entry(H, P, KPar, VPar)),
-    heapify_up(H, Par).
-
-heapify_up(_H, _P) :- true.
-
-heapify_down(H, P) :-
-    heap_entry(H, P, K, V),
-    L is P * 2,
-    R is P * 2 + 1,
-    heap_entry(H, L, Kl, _Vl),
-    heap_entry(H, R, Kr, Vr),
-    Kr < Kl,
-    Kr < K,
-    !,
-    retract(heap_entry(H, P, K, V)),
-    assert(heap_entry(H, R, K, V)),
-    retract(heap_entry(H, R, Kr, Vr)),
-    assert(heap_entry(H, P, Kr, Vr)),
-    heapify_down(H, R).
-
-heapify_down(H, P) :-
-    heap_entry(H, P, K, V),
-    L is P * 2,
-    heap_entry(H, L, Kl, Vl),
-    Kl < K,
-    !,
-    retract(heap_entry(H, P, K, V)),
-    assert(heap_entry(H, L, K, V)),
-    retract(heap_entry(H, L, Kl, Vl)),
-    assert(heap_entry(H, P, Kl, Vl)),
-    heapify_down(H, L).
-
-heapify_down(_H, _P) :- true.
-
-
+    retract(heap(H, S)),
+    assert(heap(H, NewS)).
+    %%sort_heap(H, 1, S).
 
 extract(H, K, V) :-
     head(H, K, V),
     retract(heap_entry(H, K, V)),
     decrease_position(H),
-    heapify_down(H, 1).
+    heap_size(H, S),
+    sort_heap(H, 1, S).
 
 decrease_position(H) :-
     heap_size(H, S),
@@ -106,7 +56,41 @@ modify_key(H, NewKey, OldKey, V):-
     heap_entry(H, P, OldKey, V),
     retract(heap_entry(H, P, OldKey, V)),
     assert(heap_entry(H, P, NewKey, V)),
-    heapify_down(H, 1).
+    heap_size(H, S),
+    sort_heap(H, 1, S).
 
 list_heap(H) :-
     listing(heap_entry(H, _, _, _)).
+
+swap(H, P1, P2) :-
+    heap_entry(H, P1, K1, V1),
+    heap_entry(H, P2, K2, V2),
+    retract(heap_entry(H, P1, K1, V1)),
+    retract(heap_entry(H, P2, K2, V2)),
+    assert(heap_entry(H, P1, K2, V2)),
+    assert(heap_entry(H, P2, K1, V1)).
+
+sort_heap(H, S, E) :-
+    S = E,
+    !.
+
+sort_heap(H, S, E) :-
+    min_key(H, S, E, Min),
+    heap_entry(H, PosMin, Min, _),
+    swap(H, S, PosMin),
+    NewS is S + 1,
+    sort_heap(H, NewS, E),
+    !.
+
+min_key(H, S, E, M) :-
+    S = E,
+    !,
+    heap_entry(H, E, M, _).
+
+min_key(H, S, E, M) :-
+    S < E,
+    !,
+    heap_entry(H, S, K, _),
+    NewS is S + 1,
+    min_key(H, NewS, E, M1),
+    M is min(K, M1).
