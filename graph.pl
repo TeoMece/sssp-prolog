@@ -97,7 +97,7 @@ edges(G, Es) :-
 %% neighbors /3 Restituisce la lista dei vicini di un vertice //TODO codice ripetuto
 neighbors(G, vertex(G,V), Ns) :- 
     atom(G),
-    atom(V),
+    %%atom(V),
     var(Ns),
     graph(G),
     findall(edge(G, vertex(G,V), N, W), edge(G, vertex(G,V), N, W), ArchiUscenti),
@@ -106,7 +106,7 @@ neighbors(G, vertex(G,V), Ns) :-
     !.
 neighbors(G, V, Ns) :- 
     atom(G),
-    atom(V),
+    %%atom(V),
     var(Ns),
     graph(G),
     findall(edge(G, vertex(G,V), N, W), edge(G, vertex(G,V), N, W), ArchiUscenti),

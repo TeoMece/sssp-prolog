@@ -40,11 +40,15 @@ head(H, K, V) :-
 insert(H, K, V) :-
     heap(H, _),
     heap_size(H, S),
+    value_is_not_contained(H, V),
+    !,
     NewS is S + 1,
     assert(heap_entry(H, NewS, K, V)),
     retract(heap(H, S)),
     assert(heap(H, NewS)),
     sort_heap(H, 1, NewS).
+insert(H, K, V) :-
+    heap(H, _).
 
 %% extract/3 - Estrae un elemento dall'heap
 extract(H, K, V) :-
@@ -117,3 +121,7 @@ min_key(H, S, E, M) :-
     NewS is S + 1,
     min_key(H, NewS, E, M1),
     M is min(K, M1).
+
+value_is_not_contained(H, V) :-
+    \+ heap_entry(H, _, _, V),
+    !.

@@ -19,6 +19,10 @@ set_env(G, Source) :-
     assert(distance(G, vertex(G, Source), 0)),
     set_nil_previous(G, Vs).
 
+dijkstra_sssp(G, V) :-
+    visited(G, V), !,
+    extract(lista, V, _),
+    dijkstra_sssp(G, V).
 dijkstra_sssp(G, Start) :- 
     new_heap(lista),
     neighbors(G, Start, Neighbors),
@@ -27,6 +31,7 @@ dijkstra_sssp(G, Start) :-
     set_distances(G, Vertices),
     insert_vs(Vertices, lista),
     extract(lista, V, _),
+    assert(visited(G, V)),
     dijkstra_sssp(G, V).
 
 set_distances(G, []).
@@ -43,7 +48,8 @@ calculate_distance(G, V) :-
     previous(G, T, U),
     distance(G, U, PrDist),
     get_edge_weight(G, U, V, Weight),
-    change_distance(G, V, PrDist + Weight).
+    NewW is PrDist + Weight,
+    change_distance(G, V, NewW).
 
 get_edge_weight(G, U, V, Weight) :-
     edge(G, U, V, Weight), !.
@@ -56,7 +62,7 @@ to_vertices(Source, [edge(G, vertex(G, A), Source, _)|Vs], [vertex(G, A)|Vts]) :
 to_vertices(Source, [edge(G, Source, vertex(G, B), _)|Vs], [vertex(G, B)|Vts]) :-
     to_vertices(Source, Vs, Vts).
    
-
+insert_vs([], _).
 insert_vs([vertex(G, V) | Vs], H) :-
     distance(G, vertex(G, V), D),
     insert(H, D, V),
