@@ -39,7 +39,6 @@ head(H, K, V) :-
 %% insert/3 - Inserisce un elemento nell'heap
 insert(H, K, V) :-
     heap(H, _),
-    is_key_not_used(H, K),
     heap_size(H, S),
     NewS is S + 1,
     assert(heap_entry(H, NewS, K, V)),
@@ -72,7 +71,6 @@ shift_left(H, P) :-
 %% modify_key/3 - Modifica la chiave di un elemento dell'heap
 modify_key(H, NewKey, OldKey, V):-
     heap_size(H, S),
-    is_key_not_used(H, NewKey),
     heap_entry(H, P, OldKey, V),
     retract(heap_entry(H, P, OldKey, V)),
     assert(heap_entry(H, P, NewKey, V)),
@@ -97,35 +95,25 @@ swap(H, P1, P2) :-
     assert(heap_entry(H, P1, K2, V2)),
     assert(heap_entry(H, P2, K1, V1)).
 %% sort_heap/3 - Ordina l'heap
-sort_heap(H, S, E) :-
-    heap(H, _),
-    integer(S),
-    integer(E),
-    S = E,
-    !.
+sort_heap(H, E, E) :- !.
 sort_heap(H, S, E) :-
     min_key(H, S, E, Min),
     heap_entry(H, PosMin, Min, _),
     swap(H, S, PosMin),
     NewS is S + 1,
-    sort_heap(H, NewS, E),
-    !.
+    sort_heap(H, NewS, E).
 %% min_key/4 - Restituisce la chiave minima dell'heap
-min_key(H, S, E, M) :-
+min_key(H, E, E, M) :-
     heap(H, _),
-    integer(S),
     integer(E),
-    S = E,
-    !,
-    heap_entry(H, E, M, _).
+    heap_entry(H, E, M, _),
+    !.
 
 min_key(H, S, E, M) :-
     S < E,
-    !,
+    heap(H, _),
+    integer(S),
     heap_entry(H, S, K, _),
     NewS is S + 1,
     min_key(H, NewS, E, M1),
     M is min(K, M1).
-%% is_key_not_used/2 - Verifica se la chiave è già utilizzata
-is_key_not_used(H, K) :-
-    \+ heap_entry(H, _, K, _).
