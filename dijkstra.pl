@@ -4,89 +4,99 @@
 :- dynamic previous/3.
 :- dynamic visited/2.
 
+%% change_distance/3 - cambia la distanza di un vertice
 change_distance(G, V, NewDist) :-
     retract(distance(G, V, _)),
     assert(distance(G, V, NewDist)).
 
+%% change_previous/3 - cambia il vertice precedente di un vertice
 change_previous(G, V, U) :-
     retract(previous(G, V, _)),
     assert(previous(G, V, U)).
 
-dijkstra_sssp(G, Source):-
-    new_heap(n),
-    graph(G),
-    vertex(G, Source),
+%% dijkstra_sssp/2 e dijkstra_ssso_recursive/2 - calcola il cammino minimo da un vertice sorgente a tutti gli altri
+dijkstra_sssp(G, Source) :-
+    retractall(visited(G, _)),
+    retractall(distance(G, _, _)),
+    retractall(previous(G, _, _)),
     vertices(G, Vs),
-    delete(Vs, vertex(G, Source), VsNoSource),
-    set_infinite_distances(G, VsNoSource),
+    set_infinite_distances(G, Vs),
+    retract(distance(G, vertex(G, Source), _)),
     assert(distance(G, vertex(G, Source), 0)),
-    set_nil_previous(G, VsNoSource),
+    set_nil_previous(G, Vs),
+    dijkstra_sssp_recursive(G, Source).
 
-    neighbors(G, Source, Neighbors),
-    set_neighbors_distances(G, Source, Neighbors),
-    insert_vs_in_heap(Source, Neighbors, n),
+dijkstra_sssp_recursive(G, V) :-
+    visited(G, V), !,
+    extract(lista, _, U),
+    dijkstra_sssp(G, U).
 
-    extract(n, _, Vmin),
-    dijkstra_body(Vmin, n).
+dijkstra_sssp_recursive(G, Start) :- 
+    assert(visited(G, Start)),
+    new_heap(lista),
+    neighbors(G, Start, Neighbors),
+    to_vertices(vertex(G, Start), Neighbors, Vertices),
+    set_previous(G, vertex(G, Start), Vertices),
+    set_distances(G, Vertices),
+    insert_vs(Vertices, lista),
+    extract(lista, _, V),
+    dijkstra_sssp(G, V), !.
 
-dijkstra_body(V, n):-
-    empty(n),
-    !.
-dijkstra_body(V, n):-
-    extract(n, Weight, Vmin),
-    visited(G, Vmin),
-    !,
-    dijkstra_body(V, n).
+dijkstra_sssp_recursive(G, _) :-
+    empty(lista), !.
 
-dijkstra_body(V, n) :-
-    neighbors(G, V, Neighbors),
-    set_neighbors_distances(G, V, Neighbors),
-    insert_vs_in_heap(V, Neighbors, n),
-    extract(n, Weight, Vmin),
-    assert(visited(G, V)),
-    dijkstra_body(Vmin, n).
+%% set_distances/2 - setta le distanze dei vertici adiacenti al vertice sorgente
+set_distances(G, []).
+set_distances(G, [V | Vs]) :-
+    calculate_distance(G, V),
+    set_distances(G, Vs).
+%% set_previous/3 - setta i vertici precedenti dei vertici adiacenti al vertice sorgente
+set_previous(G, _, []).
+set_previous(G, S, [vertex(G, V) | Vs]) :-
+    change_previous(G, vertex(G, V), S),
+    set_previous(G, S, Vs).
+%% calculate_distance/2 - calcola la distanza di un vertice
+calculate_distance(G, V) :-
+    previous(G, V, U),
+    distance(G, U, PrDist),
+    get_edge_weight(G, U, V, Weight),
+    NewW is PrDist + Weight,
+    distance(G, V, D),
+    D < NewW, !.
+calculate_distance(G, V) :-
+    previous(G, V, U),
+    distance(G, U, PrDist),
+    get_edge_weight(G, U, V, Weight),
+    NewW is PrDist + Weight,
+    change_distance(G, V, NewW).
+%% get_edge_weight/4 - restituisce il peso di un arco
+get_edge_weight(G, U, V, Weight) :-
+    edge(G, U, V, Weight), !.
+get_edge_weight(G, U, V, Weight) :-
+    edge(G, V, U, Weight), !.
 
-
+%% to_vertices/3 - trasforma una lista di archi in una lista di vertici
+to_vertices(_, [], []).
+to_vertices(Source, [edge(G, Source, vertex(G, B), _)|Vs], [vertex(G, B)|Vts]) :-
+    to_vertices(Source, Vs, Vts).
+%% insert_vs/2 - inserisce i vertici in una coda di priorità
+insert_vs([], _).
+insert_vs([vertex(G, V) | Vs], H) :-
+    visited(G, V), !,
+    insert_vs(Vs, H).
+insert_vs([vertex(G, V) | Vs], H) :-
+    distance(G, vertex(G, V), D),
+    insert(H, D, V),
+    insert_vs(Vs, H).
+%%set_infinite_distances/2 - setta le distanze dei vertici a infinito
 set_infinite_distances(G, []).
 
 set_infinite_distances(G, [V | Vs]) :-
-    %%retract(distance(G, V, _)),
-    assert(distance(G, V, inf)),
+    assert(distance(G, V, 42^42)),
     set_infinite_distances(G, Vs).
-
+%% set_nil_previous/2 - setta i vertici precedenti a nil
 set_nil_previous(G, []).
 
 set_nil_previous(G, [V | Vs]) :-
-    %%retract(previous(G, V, _)),
     assert(previous(G, V, nil)),
     set_nil_previous(G, Vs).
-
-
-set_neighbors_distances(_, _, []).
-
-set_neighbors_distances(G, Source, [edge(G, Source, V, W) | Neighbors]) :-
-    set_neighbors_distances(G, Source, [edge(G, V, Source, W) | Neighbors]).
-
-set_neighbors_distances(G, Source, [edge(G, V, Source, W) | Neighbors]) :-
-    distance(G, V, D),
-    V < W,
-    !,
-    change_distance(G, V, W),
-    change_previous(G, V, Source),
-    set_neighbors_distances(G, Source, Neighbors).
-
-set_neighbors_distances(G, Source, [edge(G, V, Source, W) | Neighbors]) :-
-    set_neighbors_distances(G, Source, Neighbors).
-
-
-insert_vs_in_heap([], _).
-insert_vs_in_heap(Source, [edge(G, Source, V, W) | Vs], Heap) :-
-    vertex(G, V),
-    insert(Heap, W, V),
-    insert_vs_in_heap(Vs, Heap).
-insert_vs_in_heap(Source, [edge(G, V, Source, W) | Vs], Heap) :-
-    vertex(G, V),
-    insert(Heap, W, V),
-    insert_vs_in_heap(Vs, Heap).
-    
-
