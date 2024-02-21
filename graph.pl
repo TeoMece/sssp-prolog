@@ -77,14 +77,8 @@ new_edge(G, V1, V2, W) :-
     graph(G),
     integer(W),
     W >= 0,
-    non_existing_edge(G, V1, V2),
     assert(edge(G, vertex(G, V1), vertex(G, V2), W)),
     !.
-
-%% not_existing_edge/3 controllo se esiste un arco tra due vertici
-non_existing_edge(G, V1, V2) :- 
-    graph(G),
-    \+ edge(G, vertex(G, V1), vertex(G, V2), _).
 
 %% edges /2 Restituisce la lista degli archi del grafo
 edges(G, Es) :- 
@@ -94,24 +88,18 @@ edges(G, Es) :-
     findall(edge(G, V1, V2, W), edge(G, V1, V2, W), Es),
     !.
 
-%% neighbors /3 Restituisce la lista dei vicini di un vertice //TODO codice ripetuto
+%% neighbors /3 Restituisce la lista dei vicini di un vertice
 neighbors(G, vertex(G,V), Ns) :- 
     atom(G),
-    %%atom(V),
     var(Ns),
     graph(G),
-    findall(edge(G, vertex(G,V), N, W), edge(G, vertex(G,V), N, W), ArchiUscenti),
-    findall(edge(G, N, vertex(G,V), W), edge(G, N, vertex(G,V), W), ArchiEntranti),
-    append(ArchiUscenti, ArchiEntranti, Ns),
+    findall(edge(G, vertex(G,V), N, W), edge(G, vertex(G,V), N, W), Ns),
     !.
 neighbors(G, V, Ns) :- 
     atom(G),
-    %%atom(V),
     var(Ns),
     graph(G),
-    findall(edge(G, vertex(G,V), N, W), edge(G, vertex(G,V), N, W), ArchiUscenti),
-    findall(edge(G, N, vertex(G,V), W), edge(G, N, vertex(G,V), W), ArchiEntranti),
-    append(ArchiUscenti, ArchiEntranti, Ns),
+    findall(edge(G, vertex(G,V), N, W), edge(G, vertex(G,V), N, W), Ns),
     !.
 
 %%% list_edges /1 Stampa la lista degli archi del grafo

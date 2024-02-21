@@ -4,9 +4,13 @@ gr_test(G) :-
     new_vertex(G, u),
     new_vertex(G, x),
     new_vertex(G, y),
-    new_edge(G, v, u, 2),
+    new_vertex(G, k),
+    new_edge(G, v, u, 5),
     new_edge(G, v, y, 3),
-    new_edge(G, y, x, 1).
+    new_edge(G, y, x, 1),
+    new_edge(G, v, k, 1),
+    new_edge(G, k, u, 2),
+    new_edge(G, v, x, 2).
 /*
 % graph
 :- nl.

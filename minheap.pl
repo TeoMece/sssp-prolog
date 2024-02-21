@@ -47,7 +47,7 @@ insert(H, K, V) :-
     retract(heap(H, S)),
     assert(heap(H, NewS)),
     sort_heap(H, 1, NewS).
-insert(H, K, V) :-
+insert(H, _, _) :-
     heap(H, _).
 
 %% extract/3 - Estrae un elemento dall'heap
@@ -99,7 +99,12 @@ swap(H, P1, P2) :-
     assert(heap_entry(H, P1, K2, V2)),
     assert(heap_entry(H, P2, K1, V1)).
 %% sort_heap/3 - Ordina l'heap
-sort_heap(H, E, E) :- !.
+sort_heap(H, S, E) :-
+    heap(H, _),
+    integer(S),
+    integer(E),
+    S > E,
+    !.
 sort_heap(H, S, E) :-
     min_key(H, S, E, Min),
     heap_entry(H, PosMin, Min, _),
@@ -124,4 +129,8 @@ min_key(H, S, E, M) :-
 
 value_is_not_contained(H, V) :-
     \+ heap_entry(H, _, _, V),
+    !.
+
+contains(H, K, V) :-
+    heap_entry(H, _, _, V),
     !.
