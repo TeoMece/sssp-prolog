@@ -31,7 +31,7 @@ dijkstra_sssp_recursive(G, V) :-
     extract(lista, _, U),
     dijkstra_sssp(G, U).
 
-dijkstra_sssp_recursive(G, Start) :-
+dijkstra_sssp_recursive(G, Start) :- 
     assert(visited(G, Start)),
     new_heap(lista),
     neighbors(G, Start, Neighbors),
@@ -40,18 +40,18 @@ dijkstra_sssp_recursive(G, Start) :-
     set_distances(G, Vertices),
     insert_vs(Vertices, lista),
     extract(lista, _, V),
-    dijkstra_sssp_recursive(G, V), !.
+    dijkstra_sssp(G, V), !.
 
-dijkstra_sssp_recursive(_, _) :-
+dijkstra_sssp_recursive(G, _) :-
     empty(lista), !.
 
 %% set_distances/2 - setta le distanze dei vertici adiacenti al vertice sorgente
-set_distances(_, []).
+set_distances(G, []).
 set_distances(G, [V | Vs]) :-
     calculate_distance(G, V),
     set_distances(G, Vs).
 %% set_previous/3 - setta i vertici precedenti dei vertici adiacenti al vertice sorgente
-set_previous(_, _, []).
+set_previous(G, _, []).
 set_previous(G, S, [vertex(G, V) | Vs]) :-
     change_previous(G, vertex(G, V), S),
     set_previous(G, S, Vs).
@@ -89,38 +89,23 @@ insert_vs([vertex(G, V) | Vs], H) :-
     insert(H, D, V),
     insert_vs(Vs, H).
 %%set_infinite_distances/2 - setta le distanze dei vertici a infinito
-set_infinite_distances(_, []).
+set_infinite_distances(G, []).
 
 set_infinite_distances(G, [V | Vs]) :-
-    assert(distance(G, V, inf)),
+    assert(distance(G, V, most_positive_double_float)),
     set_infinite_distances(G, Vs).
 %% set_nil_previous/2 - setta i vertici precedenti a nil
-set_nil_previous(_, []).
+set_nil_previous(G, []).
 
 set_nil_previous(G, [V | Vs]) :-
     assert(previous(G, V, nil)),
     set_nil_previous(G, Vs).
 
-%% sssp_shortest_path/3 - restituisce il cammino minimo tra due vertici
+sssp_shortest_path(G, Source, Source, Path).
+sssp_shortest_path(G, Source, V, [edge(G, P, V, Weight) | Path]) :-
+    previous(G, V, P),
+    edge(G, P, V, Weight).
 
-sssp_shortest_path(G, Source, V, Path) :-
-    sssp_shortest_path_aux(G, Source, V, _, Path).
-
-sssp_shortest_path_aux(_, Source, Source, [], []):- !.
-
-sssp_shortest_path_aux(G, vertex(G, Source), vertex(G, V), Path, ReversedPath) :-
-    previous(G, vertex(G, V), P),
-    edge(G, P, vertex(G, V), Weight),
-    sssp_shortest_path(G, vertex(G, Source), P, Path1),
-    Path = [edge(G, P, vertex(G, V), Weight) | Path1],
-    reverse(Path, ReversedPath), !.
-
-sssp_shortest_path_aux(G, Source, V, Path, ReversedPath) :-
-    previous(G, vertex(G, V), P),
-    edge(G, P, vertex(G, V), Weight),
-    sssp_shortest_path(G, vertex(G, Source), P, Path1),
-    Path = [edge(G, P, vertex(G, V), Weight) | Path1],
-    reverse(Path, ReversedPath).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Copyright © 2024 TeoMece           %

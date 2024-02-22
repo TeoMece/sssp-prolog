@@ -131,6 +131,6 @@ value_is_not_contained(H, V) :-
     \+ heap_entry(H, _, _, V),
     !.
 
-contains(H, K, V) :-
-    heap_entry(H, _, _, V),
-    !.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%          Copyright © 2024 TeoMece           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
