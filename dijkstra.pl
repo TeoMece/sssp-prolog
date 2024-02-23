@@ -51,14 +51,13 @@ dijkstra_sssp_recursive(G, Start) :-
 
 dijkstra_sssp_recursive(_, _) :-
     empty(lista), !.
-
+%% update_dist_prev/3 - aggiorna le distanze e i vertici precedenti
 update_dist_prev(_, _, []).
 
 update_dist_prev(G, V, [U | Vs]) :-
     get_new_dist(G, U, V, NewD),
     distance(G, U, D),
     NewD > D,
-    %%D = inf,
     !,
     update_dist_prev(G, V, Vs).
 
@@ -67,7 +66,7 @@ update_dist_prev(G, V, [U | Vs]) :-
     change_distance(G, U, NewD),
     change_previous(G, U, V),
     update_dist_prev(G, V, Vs).
-
+%% get_new_dist/4 - restituisce la nuova distanza di un vertice
 get_new_dist(G, V, Pr, NewW) :-
     graph(G),
     distance(G, Pr, PrDist),
@@ -123,15 +122,16 @@ sssp_shortest_path(G, Source, V, ReversedPath) :-
     sssp_shortest_path_aux(G, vertex(G, VertexSource), vertex(G, VertexV), Path),
     reverse(Path, ReversedPath).
 
-ensure_vertex(G, vertex(G, Source), Source) :- !.
-ensure_vertex(_, Source, Source).
-
 sssp_shortest_path_aux(_, Source, Source, []):- !.
 
 sssp_shortest_path_aux(G, vertex(G, Source), vertex(G, V), [edge(G, P, vertex(G, V), Weight) | Path]) :-
     previous(G, vertex(G, V), P),
     edge(G, P, vertex(G, V), Weight),
     sssp_shortest_path_aux(G, vertex(G, Source), P, Path).
+
+%% ensure_vertex/3 - estrae il nome di un vertice da un termine vertex/2 o restituisce il nome stesso
+ensure_vertex(G, vertex(G, Source), Source) :- !.
+ensure_vertex(_, Source, Source).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %          Copyright © 2024 TeoMece           %

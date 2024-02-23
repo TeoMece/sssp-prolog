@@ -120,3 +120,26 @@ Ecco i predicati disponibili nei file:
     ```
     min_key(h, s, e, m).
     ```
+
+### Test effettuati
+new_graph(grafo1).
+
+new_vertex(grafo1, vertice1).
+new_vertex(grafo1, vertice2).
+new_vertex(grafo1, vertice3).
+new_vertex(grafo1, vertice4).
+new_vertex(grafo1, vertice5).
+
+vertices(grafo1, Vs).
+
+new_edge(grafo1, vertice1, vertice2, 1).
+new_edge(grafo1, vertice1, vertice3, 5).
+new_edge(grafo1, vertice2, vertice3, 2).
+new_edge(grafo1, vertice2, vertice4, 2).
+new_edge(grafo1, vertice2, vertice5, 4).
+new_edge(grafo1, vertice3, vertice4, 3).
+new_edge(grafo1, vertice4, vertice5, 2).
+
+dijkstra_sssp(grafo1, vertice1).
+
+sssp_shortest_path(grafo1, vertice1, vertice5, P).
