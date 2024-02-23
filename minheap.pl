@@ -40,6 +40,7 @@ head(H, K, V) :-
 insert(H, K, V) :-
     heap(H, _),
     heap_size(H, S),
+    integer(K),
     value_is_not_contained(H, V),
     !,
     NewS is S + 1,

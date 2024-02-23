@@ -59,12 +59,19 @@ new_edge(G, vertex(G, V1), vertex(G, V2), W) :- %% Se esiste non faccio niente
     !.
 new_edge(G, vertex(G, V1), vertex(G, V2), W) :-
     graph(G),
+    integer(W),
     vertex(G, V1),
     vertex(G, V2),
-    integer(W),
+    edge(G, vertex(G,V1), vertex(G,V2), _),
+    !,
+    fail.
+
+new_edge(G, vertex(G, V1), vertex(G, V2), W) :-
+    graph(G),
+    vertex(G, V1),
+    vertex(G, V2),
     W >= 0,
-    non_existing_edge(G, V1, V2),
-    assert(edge(G, vertex(G, V1), vertex(G, V2), W)),
+    assert(edge(G, vertex(G,V1), vertex(G,V2), W)),
     !.
 
 new_edge(G, V1, V2, W) :- %% Se esiste non faccio niente
@@ -72,13 +79,7 @@ new_edge(G, V1, V2, W) :- %% Se esiste non faccio niente
     !.
 
 new_edge(G, V1, V2, W) :- 
-    vertex(G, V1),
-    vertex(G, V2),
-    graph(G),
-    integer(W),
-    W >= 0,
-    assert(edge(G, vertex(G, V1), vertex(G, V2), W)),
-    !.
+    new_edge(G, vertex(G, V1), vertex(G, V2), W).
 
 %% edges /2 Restituisce la lista degli archi del grafo
 edges(G, Es) :- 
